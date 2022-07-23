@@ -25,7 +25,7 @@ namespace ToDoList
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connection = "Server=localhost;Port=5432;Database=todolist;UserId=postgres;Password=admin";
+            string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<TodoContext>(options => options.UseNpgsql(connection));
             services.AddControllersWithViews();
         }
