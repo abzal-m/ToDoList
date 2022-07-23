@@ -1,0 +1,76 @@
+@using ToDoList.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Todo
+
+@{
+    ViewBag.Title = "Подробнее";
+    Layout = "_Layout";
+}
+
+<h2>Задача - @Model.Status</h2>
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <th scope="col">Статус</th>
+        <th scope="col">@Model.Status</th>
+        <th style="width: 70%" scope="col">Описани задачи</th>
+    </tr>
+    <tr>
+        <th scope="row">Приоритет</th>
+        <td>
+            @{
+                if (@Model.Priority == @TodosPriorities.Высокий.ToString())
+                {
+                    <span style="color: red">@Model.Priority</span>
+                }
+                else if (@Model.Priority == @TodosPriorities.Средний.ToString())
+                {
+                    <span style="color: blue">@Model.Priority</span>
+                }
+                else
+                {
+                    <span style="color: green">@Model.Priority</span>
+                }
+            }
+        </td>
+        <td rowspan="4">@Model.Description</td>
+    </tr>
+    <tr>
+        <th scope="row">Номер</th>
+        <td>@Model.Id</td>
+    </tr>
+    <tr>
+        <th scope="row">
+            <p>Дата Создания</p>
+            <p>Дата Открытия</p>
+            <p>Дата Закрытия</p>
+        </th>
+        <td>
+            <p>@Model.CreateDate</p>
+            <p>@Model.OpenDate</p>
+            <p>@Model.CloseDate</p>
+        </td>
+    </tr>
+    <tr>
+        <th colspan="2" scope="row">
+            <p>Действия</p>
+            @{
+                if (@Model.Status == @TaskStatuses.Новая.ToString())
+                {
+                    <a asp-route-id="@Model.Id" role="button" class="btn btn-outline-success" asp-action="TodoOpen" asp-controller="Todos">Открыть</a>
+                    <a asp-route-id="@Model.Id" role="button" class="btn btn-outline-danger" asp-action="Delete" asp-controller="Todos">Удалить</a>
+                }
+                else if (@Model.Status == @TaskStatuses.Открыта.ToString())
+                {
+                    <a asp-route-id="@Model.Id" role="button" class="btn btn-outline-secondary" asp-action="ToDoClose" asp-controller="Todos">Закрыть</a>
+                }
+                else
+                {
+                    <a asp-route-id="@Model.Id" role="button" class="btn btn-outline-danger" asp-action="Delete" asp-controller="Todos">Удалить</a>
+                }
+            }
+        </th>
+    </tr>
+    </tbody>
+</table>
+<a role="button" class="btn btn-success btn-sm" asp-action="Index" asp-controller="Todos">Вернуться к списку задач</a>

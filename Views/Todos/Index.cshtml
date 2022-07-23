@@ -1,0 +1,161 @@
+@using ToDoList.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Server.Kestrel.Core
+@model ToDoList.ViewModels.TodoListViewModel;
+
+@{
+    ViewBag.Title = "Все задачи";
+    Layout = "_Layout";
+}
+@if (Model.Todos.Any())
+{
+    <form method="get">
+        <div class="form-inline">
+            <label>Имя: </label>
+            <input name="title" value="@Model.FilterViewModel.SelectedTitle" class="form-control"/>
+
+            <label class="control-label">Приоритет: </label>
+            <select name="priority">
+                <option value="All">Все</option>
+                <option value="@TodosPriorities.Высокий.ToString()">Высокий</option>
+                <option value="@TodosPriorities.Средний.ToString()">Средний</option>
+                <option value="@TodosPriorities.Низкий.ToString()">Низкий</option>
+            </select>
+            <label class="control-label">Статус: </label>
+            <select name="status">
+                <option value="All">Все</option>
+                <option value="@TaskStatuses.Новая.ToString()">Новая</option>
+                <option value="@TaskStatuses.Открыта.ToString()">Открыта</option>
+                <option value="@TaskStatuses.Закрыта.ToString()">Закрыта</option>
+            </select>
+            <input name="fromDate" type="date" value="@Model.FilterViewModel.SelectedFromDate" class="form-control"/>
+            <input name="toDate" type="date" value="@Model.FilterViewModel.SelectedToDate" class="form-control"/>
+            <input type="submit" value="Фильтр" class="btn btn-outline-dark"/>
+        </div>
+    </form>
+
+    <table class="table">
+        <tr>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(Model.SortViewModel.TitleSort)"
+                   asp-route-title="@(Model.FilterViewModel.SelectedTitle)"
+                   asp-route-priority="@(Model.FilterViewModel.SelectedPriority)"
+                   asp-route-status="@(Model.FilterViewModel.SelectedStatus)"
+                   asp-route-fromDate="@(Model.FilterViewModel.SelectedFromDate)"
+                   asp-route-toDate="@(Model.FilterViewModel.SelectedToDate)">
+                    Имя задачи
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(Model.SortViewModel.PrioritySort)"
+                   asp-route-title="@(Model.FilterViewModel.SelectedTitle)"
+                   asp-route-priority="@(Model.FilterViewModel.SelectedPriority)"
+                   asp-route-status="@(Model.FilterViewModel.SelectedStatus)"
+                   asp-route-fromDate="@(Model.FilterViewModel.SelectedFromDate)"
+                   asp-route-toDate="@(Model.FilterViewModel.SelectedToDate)">
+                    Приоритет
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(Model.SortViewModel.StatusSort)"
+                   asp-route-title="@(Model.FilterViewModel.SelectedTitle)"
+                   asp-route-priority="@(Model.FilterViewModel.SelectedPriority)"
+                   asp-route-status="@(Model.FilterViewModel.SelectedStatus)"
+                   asp-route-fromDate="@(Model.FilterViewModel.SelectedFromDate)"
+                   asp-route-toDate="@(Model.FilterViewModel.SelectedToDate)">
+                    Статус
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(Model.SortViewModel.CreateDateSort)"
+                   asp-route-title="@(Model.FilterViewModel.SelectedTitle)"
+                   asp-route-priority="@(Model.FilterViewModel.SelectedPriority)"
+                   asp-route-status="@(Model.FilterViewModel.SelectedStatus)"
+                   asp-route-fromDate="@(Model.FilterViewModel.SelectedFromDate)"
+                   asp-route-toDate="@(Model.FilterViewModel.SelectedToDate)">
+                    Дата создания
+                </a>
+            </th>
+        </tr>
+        @foreach (Todo u in Model.Todos)
+        {
+            <tr>
+                <td>@u.Title</td>
+                <td>
+                    @{
+                        if (u.Priority == @TodosPriorities.Высокий.ToString())
+                        {
+                            <span style="color: red">@u.Priority</span>
+                        }
+                        else if (@u.Priority == @TodosPriorities.Средний.ToString())
+                        {
+                            <span style="color: blue">@u.Priority</span>
+                        }
+                        else
+                        {
+                            <span style="color: green">@u.Priority</span>
+                        }
+                    }
+                </td>
+                <td>@u.Status</td>
+                <td>@u.CreateDate</td>
+                <td>
+                    <a asp-route-id="@u.Id" role="button" class="btn btn-outline-info" asp-action="GetTodo" asp-controller="Todos">Детали</a>
+                    @{
+                        if (@u.Status == @TaskStatuses.Новая.ToString())
+                        {
+                            <a asp-route-id="@u.Id" role="button" class="btn btn-outline-success" asp-action="TodoOpen" asp-controller="Todos">Открыть</a>
+                            <a asp-route-id="@u.Id" role="button" class="btn btn-outline-danger" asp-action="Delete" asp-controller="Todos">Удалить</a>
+                        }
+                        else if (@u.Status == @TaskStatuses.Открыта.ToString())
+                        {
+                            <a asp-route-id="@u.Id" role="button" class="btn btn-outline-secondary" asp-action="ToDoClose" asp-controller="Todos">Закрыть</a>
+                        }
+                        else
+                        {
+                            <a asp-route-id="@u.Id" role="button" class="btn btn-outline-danger" asp-action="Delete" asp-controller="Todos">Удалить</a>
+                        }
+                    }
+
+                </td>
+            </tr>
+        }
+    </table>
+@if (Model.PageViewModel.HasPreviousPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+       asp-route-title="@(Model.FilterViewModel.SelectedTitle)"
+       asp-route-priority="@(Model.FilterViewModel.SelectedPriority)"
+       asp-route-status="@(Model.FilterViewModel.SelectedStatus)"
+       asp-route-fromDate="@(Model.FilterViewModel.SelectedFromDate)"
+       asp-route-toDate="@(Model.FilterViewModel.SelectedToDate)"
+       class="btn  btn-outline-dark">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        Назад
+    </a>
+}
+@if (Model.PageViewModel.HasNextPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+       asp-route-title="@(Model.FilterViewModel.SelectedTitle)"
+       asp-route-priority="@(Model.FilterViewModel.SelectedPriority)"
+       asp-route-status="@(Model.FilterViewModel.SelectedStatus)"
+       asp-route-fromDate="@(Model.FilterViewModel.SelectedFromDate)"
+       asp-route-toDate="@(Model.FilterViewModel.SelectedToDate)"
+       class="btn btn-outline-dark">
+        Вперед
+        <i class="glyphicon glyphicon-chevron-right"></i>
+    </a>
+}
+}
+
+else
+{
+    <h3>Список задач пуст</h3>
+}
